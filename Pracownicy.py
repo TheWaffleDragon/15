@@ -17,7 +17,12 @@ df.dropna(thresh=2,inplace=True)
 sns.heatmap(df.isnull())
 
 #%%
-df['DOB'] = pd.to_datetime(df['DOB'],format='%m/%d/%y')
+#df['DOB'] = pd.to_datetime(df['DOB'],format='%m/%d/%Y')
+dob_tmp = df['DOB'].str.split('/', expand=True).astype(int)
+#df['DOB_year'] = df['DOB'].text.apply(lambda x: x.split('/')[-1])
+dob_tmp = dob_tmp.astype(int)
+df['DOB_year'] = dob_tmp[2]
+#%%
 
 df['DateofHire'] = pd.to_datetime(df['DateofHire'],format='%m/%d/%Y')
 
@@ -59,6 +64,7 @@ jeśli zależy nam na jak najdłuższym stażu pracowników?
 '''
 import datetime as dt
 
+
 def count_seniority(row):
 
     if pd.isnull(row['DateofTermination']):
@@ -85,7 +91,7 @@ sposób z zadowoleniem z pracy (EmpSatisfaction)?
 '''
 df_sat = df.pivot_table(values='EmpSatisfaction', index='MaritalStatusID',aggfunc='mean')
 
-
+#
 #%%
 '''
 4. Jak wygląda struktura wieku aktualnie zatrudnionych pracowników?
@@ -94,22 +100,23 @@ def age(row):
     
     end_date = dt.datetime(2019,9,27)
     
-    x=(end_date - row['DOB'])/np.timedelta64(1,'Y')
+    x=end_date.year - 1900 -row['DOB_year']
 
     return x
+
+
 
 df['Age'] = df.apply(lambda row: age(row),axis=1)
 
 
 #prowizoryczne czyszczenie dziwnych lat
 
-df['Year'] = df['DOB'].dt.year
-df_age = df['Age'].where(df['Year']<2000)
-df_age.dropna(inplace=True)
+# df['Year'] = df['DOB'].dt.year
+# df_age = df['Age'].where(df['Year']<2000)
+# df_age.dropna(inplace=True)
 
 
-sns.histplot(data = df_age)
-print(df_age.describe())
+print(df['Age'].describe())
 
 #%%
 '''
